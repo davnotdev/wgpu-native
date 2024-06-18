@@ -4294,3 +4294,43 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderEndPipelineStatisticsQuery(
 
     render_ffi::wgpu_render_pass_end_pipeline_statistics_query(encoder);
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuDeviceCreateShaderModuleSPIRV(
+    device: native::WGPUDevice,
+    descriptor: Option<&native::WGPUShaderModuleSPIRVDescriptor>,
+) -> native::WGPUShaderModule {
+    let device = device.as_ref().expect("invalid device");
+    let device_id = device.id;
+    let context = &device.context;
+    let error_sink = &device.error_sink;
+
+    let descriptor = descriptor.expect("invalid descriptor");
+    let code_slice = make_slice(descriptor.code, descriptor.codeSize as usize).to_owned();
+
+    let (shader_module_id, error) = gfx_select!(device_id => context.device_create_shader_module_spirv(
+        device_id,
+        &wgc::pipeline::ShaderModuleDescriptor {
+            label: None,
+            shader_bound_checks: wgt::ShaderBoundChecks::new(),
+        },
+        Cow::Owned(code_slice),
+        (),
+    ));
+
+    if let Some(cause) = error {
+        handle_error(
+            context,
+            error_sink,
+            cause,
+            LABEL,
+            None,
+            "wgpuDeviceCreateShaderModuleSPIRV",
+        );
+    }
+
+    Arc::into_raw(Arc::new(WGPUShaderModuleImpl {
+        context: context.clone(),
+        id: Some(shader_module_id),
+    }))
+}

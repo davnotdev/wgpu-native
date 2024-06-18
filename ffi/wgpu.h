@@ -43,7 +43,7 @@ typedef enum WGPUNativeFeature {
     // WGPUNativeFeature_PolygonModePoint = 0x00030014,
     // WGPUNativeFeature_ConservativeRasterization = 0x00030015,
     // WGPUNativeFeature_ClearTexture = 0x00030016,
-    // WGPUNativeFeature_SpirvShaderPassthrough = 0x00030017,
+    WGPUNativeFeature_SpirvShaderPassthrough = 0x00030017,
     // WGPUNativeFeature_Multiview = 0x00030018,
     WGPUNativeFeature_VertexAttribute64bit = 0x00030019,
     WGPUNativeFeature_ShaderUnusedVertexOutput = 0x0003001A,
@@ -282,6 +282,8 @@ void wgpuComputePassEncoderBeginPipelineStatisticsQuery(WGPUComputePassEncoder c
 void wgpuComputePassEncoderEndPipelineStatisticsQuery(WGPUComputePassEncoder computePassEncoder);
 void wgpuRenderPassEncoderBeginPipelineStatisticsQuery(WGPURenderPassEncoder renderPassEncoder, WGPUQuerySet querySet, uint32_t queryIndex);
 void wgpuRenderPassEncoderEndPipelineStatisticsQuery(WGPURenderPassEncoder renderPassEncoder);
+
+void wgpuDeviceCreateShaderModuleSpirv(WGPUDevice device, WGPUShaderModuleSPIRVDescriptor const * descriptor);
 
 #ifdef __cplusplus
 } // extern "C"
