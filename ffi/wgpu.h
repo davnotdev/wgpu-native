@@ -283,7 +283,7 @@ void wgpuComputePassEncoderEndPipelineStatisticsQuery(WGPUComputePassEncoder com
 void wgpuRenderPassEncoderBeginPipelineStatisticsQuery(WGPURenderPassEncoder renderPassEncoder, WGPUQuerySet querySet, uint32_t queryIndex);
 void wgpuRenderPassEncoderEndPipelineStatisticsQuery(WGPURenderPassEncoder renderPassEncoder);
 
-WGPUShaderModule wgpuDeviceCreateShaderModuleSpirv(WGPUDevice device, WGPUShaderModuleSPIRVDescriptor const * descriptor);
+WGPUShaderModule wgpuDeviceCreateShaderModuleSPIRV(WGPUDevice device, WGPUShaderModuleSPIRVDescriptor const * descriptor);
 
 #ifdef __cplusplus
 } // extern "C"
