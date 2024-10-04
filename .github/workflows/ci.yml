@@ -13,14 +13,13 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: full
   CACHE_SUFFIX: a
+  WGPU_ANDROID_NDK_VERSION: r27b # 27.1.12297006
 
 jobs:
   # A build that does some "meta" checks on the code integrity where the Rust compiler can't.
   integrity-build:
     name: Code integrity checks
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -85,7 +84,7 @@ jobs:
             target: aarch64-linux-android
             setup_env: |
               set -x
-              ANDROID_NDK_HOME=$ANDROID_HOME/ndk/25.2.9519653
+              ANDROID_NDK_HOME=$HOME/wgpu-deps/ndk/android-ndk-$WGPU_ANDROID_NDK_VERSION
               CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
 
               echo "CC=$CC" >> $GITHUB_ENV
@@ -93,7 +92,6 @@ jobs:
               echo "CLANG_PATH=$CC" >> $GITHUB_ENV
               echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$CC" >> $GITHUB_ENV
 
-              echo "LIBCLANG_PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib64/libclang.so.13" >> $GITHUB_ENV
               echo "LLVM_CONFIG_PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-config" >> $GITHUB_ENV
               echo "BINDGEN_EXTRA_CLANG_ARGS='-isysroot $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot'" >> $GITHUB_ENV
           - name: Android armv7
@@ -101,7 +99,7 @@ jobs:
             target: armv7-linux-androideabi
             setup_env: |
               set -x
-              ANDROID_NDK_HOME=$ANDROID_HOME/ndk/25.2.9519653
+              ANDROID_NDK_HOME=$HOME/wgpu-deps/ndk/android-ndk-$WGPU_ANDROID_NDK_VERSION
               CC=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang
 
               echo "CC=$CC" >> $GITHUB_ENV
@@ -109,7 +107,6 @@ jobs:
               echo "CLANG_PATH=$CC" >> $GITHUB_ENV
               echo "CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$CC" >> $GITHUB_ENV
 
-              echo "LIBCLANG_PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/lib64/libclang.so.13" >> $GITHUB_ENV
               echo "LLVM_CONFIG_PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-config" >> $GITHUB_ENV
               echo "BINDGEN_EXTRA_CLANG_ARGS='-isysroot $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot'" >> $GITHUB_ENV
           # iOS
@@ -130,6 +127,14 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           key: clippy-${{ matrix.target }}-${{ env.CACHE_SUFFIX }}
+      - if: contains(matrix.target, 'android')
+        name: Setup Android NDK
+        run: |
+          mkdir -p $HOME/wgpu-deps/ndk
+          cd $HOME/wgpu-deps/ndk
+          curl -LO https://dl.google.com/android/repository/android-ndk-$WGPU_ANDROID_NDK_VERSION-linux.zip
+          unzip android-ndk-$WGPU_ANDROID_NDK_VERSION-linux.zip
+          rm android-ndk-$WGPU_ANDROID_NDK_VERSION-linux.zip
       - name: Setup Environment
         run: ${{ matrix.setup_env }}
       - name: Run clippy
