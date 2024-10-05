@@ -4296,6 +4296,19 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderEndPipelineStatisticsQuery(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn wgpuComputePassEncoderSetPushConstants(
+    pass: native::WGPUComputePassEncoder,
+    offset: u32,
+    size_bytes: u32,
+    data: *const u8,
+) {
+    let pass = pass.as_ref().expect("invalid render pass");
+    let encoder = pass.encoder.as_mut().unwrap();
+
+    compute_ffi::wgpu_compute_pass_set_push_constant(encoder, offset, size_bytes, data);
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn wgpuDeviceCreateShaderModuleSPIRV(
     device: native::WGPUDevice,
     descriptor: Option<&native::WGPUShaderModuleSPIRVDescriptor>,

@@ -295,6 +295,8 @@ void wgpuComputePassEncoderEndPipelineStatisticsQuery(WGPUComputePassEncoder com
 void wgpuRenderPassEncoderBeginPipelineStatisticsQuery(WGPURenderPassEncoder renderPassEncoder, WGPUQuerySet querySet, uint32_t queryIndex);
 void wgpuRenderPassEncoderEndPipelineStatisticsQuery(WGPURenderPassEncoder renderPassEncoder);
 
+void wgpuComputePassEncoderSetPushConstants(WGPUComputePassEncoder encoder, uint32_t offset, uint32_t sizeBytes, void const * data);
+
 WGPUShaderModule wgpuDeviceCreateShaderModuleSPIRV(WGPUDevice device, WGPUShaderModuleSPIRVDescriptor const * descriptor);
 
 #ifdef __cplusplus
