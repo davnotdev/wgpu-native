@@ -5,7 +5,7 @@ use conv::{
     map_bind_group_layout_entry, map_device_descriptor, map_instance_backend_flags,
     map_instance_descriptor, map_pipeline_layout_descriptor, map_query_set_descriptor,
     map_query_set_index, map_shader_module, map_surface, map_surface_configuration,
-    CreateSurfaceParams,
+    map_texture_view_descriptor, CreateSurfaceParams,
 };
 use core::slice;
 use parking_lot::Mutex;
@@ -4117,28 +4117,11 @@ pub unsafe extern "C" fn wgpuTextureCreateView(
     };
 
     let desc = match descriptor {
-        Some(descriptor) => wgc::resource::TextureViewDescriptor {
-            usage: Some(conv::map_texture_usage_flags(descriptor.usage)),
-            label: string_view_into_label(descriptor.label),
-            format: conv::map_texture_format(descriptor.format),
-            dimension: conv::map_texture_view_dimension(descriptor.dimension),
-            range: wgt::ImageSubresourceRange {
-                aspect: conv::map_texture_aspect(descriptor.aspect)
-                    .unwrap_or(wgt::TextureAspect::All),
-                base_mip_level: descriptor.baseMipLevel,
-                mip_level_count: match descriptor.mipLevelCount {
-                    0 => panic!("invalid mipLevelCount"),
-                    native::WGPU_MIP_LEVEL_COUNT_UNDEFINED => None,
-                    _ => Some(descriptor.mipLevelCount),
-                },
-                base_array_layer: descriptor.baseArrayLayer,
-                array_layer_count: match descriptor.arrayLayerCount {
-                    0 => panic!("invalid arrayLayerCount"),
-                    native::WGPU_ARRAY_LAYER_COUNT_UNDEFINED => None,
-                    _ => Some(descriptor.arrayLayerCount),
-                },
-            },
-        },
+        Some(descriptor) => {
+            follow_chain!(map_texture_view_descriptor((descriptor),
+                WGPUSType_TextureViewDescriptorExtras => native::WGPUTextureViewDescriptorExtras)
+            )
+        }
         None => wgc::resource::TextureViewDescriptor::default(),
     };
 
