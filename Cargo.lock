@@ -514,7 +514,7 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 [[package]]
 name = "naga"
 version = "24.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?tag=v24.0.0#779261e64daa6cf76c826532b7a1561d8ec203fd"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#da815b907182e37752340438bda239f3e7cd9538"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -982,7 +982,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "24.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?tag=v24.0.0#779261e64daa6cf76c826532b7a1561d8ec203fd"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#da815b907182e37752340438bda239f3e7cd9538"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -1008,7 +1008,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "24.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?tag=v24.0.0#779261e64daa6cf76c826532b7a1561d8ec203fd"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#da815b907182e37752340438bda239f3e7cd9538"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -1073,7 +1073,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "24.0.0"
-source = "git+https://github.com/gfx-rs/wgpu?tag=v24.0.0#779261e64daa6cf76c826532b7a1561d8ec203fd"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#da815b907182e37752340438bda239f3e7cd9538"
 dependencies = [
  "bitflags 2.8.0",
  "js-sys",
