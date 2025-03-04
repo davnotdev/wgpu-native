@@ -15,6 +15,7 @@ typedef enum WGPUNativeSType {
     WGPUSType_QuerySetDescriptorExtras = 0x00030009,
     WGPUSType_SurfaceConfigurationExtras = 0x0003000A,
     WGPUSType_SurfaceSourceSwapChainPanel = 0x0003000B,
+    WGPUSType_TextureViewDescriptorExtras = 0x00040000,
     WGPUNativeSType_Force32 = 0x7FFFFFFF
 } WGPUNativeSType;
 
@@ -282,6 +283,28 @@ typedef enum WGPUNativeTextureFormat {
     // From Features::TEXTURE_FORMAT_NV12
     WGPUNativeTextureFormat_NV12 = 0x00030007,
 } WGPUNativeTextureFormat;
+
+typedef enum WGPUTextureComponentSwizzle {
+    WGPUTextureComponentSwizzle_Identity,
+    WGPUTextureComponentSwizzle_Zero,
+    WGPUTextureComponentSwizzle_One,
+    WGPUTextureComponentSwizzle_R,
+    WGPUTextureComponentSwizzle_G,
+    WGPUTextureComponentSwizzle_B,
+    WGPUTextureComponentSwizzle_A,
+} WGPUTextureComponentSwizzle;
+
+typedef struct WGPUTextureViewSwizzle {
+    WGPUTextureComponentSwizzle r;
+    WGPUTextureComponentSwizzle g;
+    WGPUTextureComponentSwizzle b;
+    WGPUTextureComponentSwizzle a;
+} WGPUTextureViewSwizzle;
+
+typedef struct WGPUTextureViewDescriptorExtras {
+    WGPUChainedStruct chain;
+    WGPUTextureViewSwizzle swizzle;    
+} WGPUTextureViewExtras;
 
 #ifdef __cplusplus
 extern "C" {
