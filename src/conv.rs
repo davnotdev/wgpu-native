@@ -1668,6 +1668,40 @@ pub unsafe fn map_query_set_descriptor<'a>(
 }
 
 #[inline]
+pub unsafe fn map_texture_view_descriptor<'a>(
+    descriptor: &native::WGPUTextureViewDescriptor,
+    extras: Option<&native::WGPUTextureViewExtras>,
+) -> wgc::resource::TextureViewDescriptor<'a> {
+    let mut desc = wgc::resource::TextureViewDescriptor {
+        usage: Some(map_texture_usage_flags(descriptor.usage)),
+        label: string_view_into_label(descriptor.label),
+        format: map_texture_format(descriptor.format),
+        dimension: map_texture_view_dimension(descriptor.dimension),
+        range: wgt::ImageSubresourceRange {
+            aspect: map_texture_aspect(descriptor.aspect).unwrap_or(wgt::TextureAspect::All),
+            base_mip_level: descriptor.baseMipLevel,
+            mip_level_count: match descriptor.mipLevelCount {
+                0 => panic!("invalid mipLevelCount"),
+                native::WGPU_MIP_LEVEL_COUNT_UNDEFINED => None,
+                _ => Some(descriptor.mipLevelCount),
+            },
+            base_array_layer: descriptor.baseArrayLayer,
+            array_layer_count: match descriptor.arrayLayerCount {
+                0 => panic!("invalid arrayLayerCount"),
+                native::WGPU_ARRAY_LAYER_COUNT_UNDEFINED => None,
+                _ => Some(descriptor.arrayLayerCount),
+            },
+        },
+        swizzle: None,
+    };
+    if let Some(extras) = extras {
+        desc.swizzle = Some(map_texture_view_swizzle(extras.swizzle));
+    }
+
+    desc
+}
+
+#[inline]
 pub fn map_texture_usage_flags(flags: native::WGPUTextureUsage) -> wgt::TextureUsages {
     let mut temp = wgt::TextureUsages::empty();
     if (flags & native::WGPUTextureUsage_CopySrc) != 0 {
@@ -1683,6 +1717,33 @@ pub fn map_texture_usage_flags(flags: native::WGPUTextureUsage) -> wgt::TextureU
         temp.insert(wgt::TextureUsages::RENDER_ATTACHMENT);
     }
     temp
+}
+
+#[inline]
+pub fn map_texture_component_swizzle(
+    component_swizzle: native::WGPUTextureComponentSwizzle,
+) -> wgt::TextureComponentSwizzle {
+    match component_swizzle {
+        native::WGPUTextureComponentSwizzle_Zero => wgt::TextureComponentSwizzle::Zero,
+        native::WGPUTextureComponentSwizzle_One => wgt::TextureComponentSwizzle::One,
+        native::WGPUTextureComponentSwizzle_R => wgt::TextureComponentSwizzle::R,
+        native::WGPUTextureComponentSwizzle_G => wgt::TextureComponentSwizzle::G,
+        native::WGPUTextureComponentSwizzle_B => wgt::TextureComponentSwizzle::B,
+        native::WGPUTextureComponentSwizzle_A => wgt::TextureComponentSwizzle::A,
+        _ => wgt::TextureComponentSwizzle::Identity,
+    }
+}
+
+#[inline]
+pub fn map_texture_view_swizzle(
+    swizzle: native::WGPUTextureViewSwizzle,
+) -> wgt::TextureViewSwizzle {
+    wgt::TextureViewSwizzle {
+        r: map_texture_component_swizzle(swizzle.r),
+        g: map_texture_component_swizzle(swizzle.g),
+        b: map_texture_component_swizzle(swizzle.b),
+        a: map_texture_component_swizzle(swizzle.a),
+    }
 }
 
 #[inline]
