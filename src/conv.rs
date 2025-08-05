@@ -774,7 +774,6 @@ pub fn map_texture_dimension(value: native::WGPUTextureDimension) -> Option<wgt:
 }
 
 #[rustfmt::skip]
-#[inline]
 pub fn map_texture_format(value: native::WGPUTextureFormat) -> Option<wgt::TextureFormat> {
     use wgt::{AstcBlock, AstcChannel};
 
