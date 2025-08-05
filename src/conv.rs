@@ -317,7 +317,6 @@ pub unsafe fn map_instance_descriptor(
                 string_view_into_str(extras.dxcPath),
             ) {
                 (Some(dxil_path), Some(dxc_path)) => wgt::Dx12Compiler::DynamicDxc {
-                    dxil_path: dxil_path.to_string(),
                     dxc_path: dxc_path.to_string(),
                     max_shader_model: map_dxc_max_shader_model(extras.dxcMaxShaderModel),
                 },
@@ -342,6 +341,7 @@ pub unsafe fn map_instance_descriptor(
                 native::WGPUInstanceFlag_Default => wgt::InstanceFlags::default(),
                 flags => map_instance_flags(flags),
             },
+            memory_budget_thresholds: Default::default(),
         }
     } else {
         wgt::InstanceDescriptor::default()

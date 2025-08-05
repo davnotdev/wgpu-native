@@ -1194,6 +1194,10 @@ pub unsafe extern "C" fn wgpuCommandEncoderBeginRenderPass(
                             .expect("invalid load op for render pass color attachment"),
                             store_op: conv::map_store_op(color_attachment.storeOp)
                                 .expect("invalid store op for render pass color attachment"),
+                            // TODO: IDK
+                            depth_slice: (color_attachment.depthSlice
+                                != native::WGPU_DEPTH_SLICE_UNDEFINED)
+                                .then_some(color_attachment.depthSlice),
                         }
                     })
                 })
@@ -1277,7 +1281,7 @@ pub unsafe extern "C" fn wgpuCommandEncoderCopyBufferToBuffer(
         source_offset,
         destination_buffer_id,
         destination_offset,
-        size,
+        Some(size),
     ) {
         handle_error(
             error_sink,
