@@ -614,14 +614,16 @@ fn handle_error(
     while let Some(source) = source_opt {
         match source.downcast_ref::<wgc::device::DeviceError>() {
             Some(wgc::device::DeviceError::Lost) => {
-                return sink.handle_error(crate::Error::DeviceLost {
-                    source: Box::new(error),
-                });
+                panic!()
+                // return sink.handle_error(crate::Error::DeviceLost {
+                //     source: Box::new(error),
+                // });
             }
             Some(wgc::device::DeviceError::OutOfMemory) => {
-                return sink.handle_error(crate::Error::OutOfMemory {
-                    source: Box::new(error),
-                });
+                panic!()
+                // return sink.handle_error(crate::Error::OutOfMemory {
+                //     source: Box::new(error),
+                // });
             }
             _ => (),
         }
@@ -629,10 +631,10 @@ fn handle_error(
     }
 
     // Otherwise, it is a validation error
-    sink.handle_error(crate::Error::Validation {
-        description: format_error(&error),
-        source: Box::new(error),
-    });
+    // sink.handle_error(crate::Error::Validation {
+    //     description: format_error(&error),
+    //     source: Box::new(error),
+    // });
 }
 
 // webgpu.h functions

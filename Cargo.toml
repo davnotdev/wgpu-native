@@ -15,6 +15,12 @@ repository = "https://github.com/gfx-rs/wgpu-native"
 keywords = ["graphics"]
 license = "MIT OR Apache-2.0"
 
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
 [workspace]
 members = ["."]
 default-members = ["."]
@@ -102,6 +108,10 @@ serde = ["dep:serde", "wgc/serde"]
 ## To replay a trace file use the [wgpu player](https://github.com/gfx-rs/wgpu/tree/trunk/player).
 replay = ["serde", "wgc/replay"]
 
+[dependencies.wgpu]
+workspace = true
+features = ["std", "parking_lot", "webgpu", "wgsl"]
+
 [dependencies.wgc]
 workspace = true
 features = ["raw-window-handle"]
@@ -114,7 +124,7 @@ workspace = true
 # We want the wgpu-core Direct3D backend and OpenGL (via WGL) on Windows.
 [target.'cfg(windows)'.dependencies.wgc]
 workspace = true
-features = ["gles"]
+# features = ["gles"]
 
 # We want the wgpu-core Vulkan backend on Unix (but not macOS, iOS) and Windows.
 [target.'cfg(any(windows, all(unix, not(target_os = "ios"), not(target_os = "macos"))))'.dependencies.wgc]
@@ -124,7 +134,7 @@ features = ["vulkan"]
 # We want the wgpu-core GLES backend on Unix (but not macOS, iOS).
 [target.'cfg(all(unix, not(target_os = "ios"), not(target_os = "macos")))'.dependencies.wgc]
 workspace = true
-features = ["gles"]
+# features = ["gles"]
 
 [dependencies.hal]
 workspace = true

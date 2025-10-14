@@ -111,6 +111,9 @@ clear:
 lib-native: Cargo.lock Cargo.toml Makefile $(WILDCARD_SOURCE)
 	cargo build $(EXTRA_BUILD_ARGS)
 
+lib-web: Cargo.lock Cargo.toml Makefile $(WILDCARD_SOURCE)
+	cargo build $(EXTRA_BUILD_ARGS) --target wasm32-unknown-emscripten
+
 lib-native-release: Cargo.lock Cargo.toml Makefile $(WILDCARD_SOURCE)
 	cargo build --release $(EXTRA_BUILD_ARGS)
 
