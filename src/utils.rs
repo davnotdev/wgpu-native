@@ -328,10 +328,6 @@ pub unsafe fn string_view_into_str<'a>(string_view: native::WGPUStringView) -> O
     }
 }
 
-pub unsafe fn string_view_into_label<'a>(string_view: native::WGPUStringView) -> wgc::Label<'a> {
-    string_view_into_str(string_view).map(Cow::Borrowed)
-}
-
 pub const fn str_into_string_view(str: &str) -> native::WGPUStringView {
     native::WGPUStringView {
         data: str.as_ptr() as *const std::os::raw::c_char,

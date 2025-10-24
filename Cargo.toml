@@ -26,10 +26,11 @@ members = ["."]
 default-members = ["."]
 resolver = "2"
 
-[workspace.dependencies.wgc]
-package = "wgpu-core"
+[workspace.dependencies.wgpu]
+package = "wgpu"
 git = "https://github.com/davnotdev/wgpu"
 branch = "godot-webgpu"
+default-features = false
 
 [workspace.dependencies.wgt]
 package = "wgpu-types"
@@ -50,7 +51,8 @@ branch = "godot-webgpu"
 crate-type = ["cdylib", "staticlib"]
 
 [features]
-default = ["wgsl", "spirv", "glsl", "dx12", "metal"]
+# TODO:
+default = ["spirv", "glsl"]
 
 #! ### Backends
 # --------------------------------------------------------------------
@@ -58,17 +60,19 @@ default = ["wgsl", "spirv", "glsl", "dx12", "metal"]
 #! On Windows, Linux & Android the Vulkan & GLES backends are always enabled.
 #! See [#3514](https://github.com/gfx-rs/wgpu/issues/3514) for more details.
 
+# TODO:
+
 ## Enables the DX12 backend on Windows.
-dx12 = ["wgc/dx12"]
+# dx12 = ["wgc/dx12"]
 
 ## Enables the Metal backend on macOS & iOS.
-metal = ["wgc/metal"]
+# metal = ["wgc/metal"]
 
 ## Enables the GLES backend via [ANGLE](https://github.com/google/angle) on macOS using.
-angle = ["wgc/gles"]
+# angle = ["wgc/gles"]
 
 ## Enables the Vulkan backend on macOS & iOS.
-vulkan-portability = ["wgc/vulkan"]
+# vulkan-portability = ["wgc/vulkan"]
 
 #! **Note:** In the documentation, if you see that an item depends on a backend,
 #! it means that the item is only available when that backend is enabled _and_ the backend
@@ -78,63 +82,14 @@ vulkan-portability = ["wgc/vulkan"]
 # --------------------------------------------------------------------
 
 ## Enable accepting SPIR-V shaders as input.
-spirv = ["naga/spv-in", "wgc/spirv"]
+spirv = ["naga/spv-in"]
 
 ## Enable accepting GLSL shaders as input.
-glsl = ["naga/glsl-in", "wgc/glsl"]
-
-## Enable accepting WGSL shaders as input.
-wgsl = ["wgc/wgsl"]
-
-#! ### Logging & Tracing
-# --------------------------------------------------------------------
-#! The following features do not have any effect on the WebGPU backend.
-
-## Apply run-time checks, even in release builds. These are in addition
-## to the validation carried out at public APIs in all builds.
-strict_asserts = ["wgc/strict_asserts", "wgt/strict_asserts"]
-
-## Log all API entry points at info instead of trace level.
-api_log_info = ["wgc/api_log_info"]
-
-## Enables serialization via `serde` on common wgpu types.
-serde = ["dep:serde", "wgc/serde"]
-
-# Uncomment once upstream adds it again — https://github.com/gfx-rs/wgpu/issues/5974
-# ## Allow writing of trace capture files. See [`Adapter::request_device`].
-# trace = ["serde", "wgc/trace"]
-
-## Allow deserializing of trace capture files that were written with the `trace` feature.
-## To replay a trace file use the [wgpu player](https://github.com/gfx-rs/wgpu/tree/trunk/player).
-replay = ["serde", "wgc/replay"]
+glsl = ["naga/glsl-in"]
 
 [dependencies.wgpu]
 workspace = true
 features = ["std", "parking_lot", "webgpu", "wgsl"]
-
-[dependencies.wgc]
-workspace = true
-features = ["raw-window-handle"]
-
-# Enable `wgc` by default on macOS and iOS to allow the `metal` crate feature to
-# enable the Metal backend while being no-op on other targets.
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.wgc]
-workspace = true
-
-# We want the wgpu-core Direct3D backend and OpenGL (via WGL) on Windows.
-[target.'cfg(windows)'.dependencies.wgc]
-workspace = true
-# features = ["gles"]
-
-# We want the wgpu-core Vulkan backend on Unix (but not macOS, iOS) and Windows.
-[target.'cfg(any(windows, all(unix, not(target_os = "ios"), not(target_os = "macos"))))'.dependencies.wgc]
-workspace = true
-features = ["vulkan"]
-
-# We want the wgpu-core GLES backend on Unix (but not macOS, iOS).
-[target.'cfg(all(unix, not(target_os = "ios"), not(target_os = "macos")))'.dependencies.wgc]
-workspace = true
-# features = ["gles"]
 
 [dependencies.hal]
 workspace = true

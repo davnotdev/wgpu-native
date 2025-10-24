@@ -1,17 +1,11 @@
-use crate::utils::{make_slice, string_view_into_label, string_view_into_str};
+use crate::utils::{make_slice, string_view_into_str};
 use crate::{follow_chain, map_enum, map_enum_with_undefined, new_userdata};
 use crate::{native, UncapturedErrorCallback};
 use std::borrow::Cow;
 use std::num::{NonZeroIsize, NonZeroU32, NonZeroU64};
 use std::ptr::NonNull;
 
-map_enum!(
-    map_store_op,
-    WGPUStoreOp,
-    wgc::command::StoreOp,
-    Discard,
-    Store
-);
+map_enum!(map_store_op, WGPUStoreOp, wgt::StoreOp, Discard, Store);
 map_enum_with_undefined!(
     map_address_mode,
     WGPUAddressMode,
@@ -354,12 +348,12 @@ pub(crate) unsafe fn map_device_descriptor<'a>(
     base_limits: wgt::Limits,
     _extras: Option<&native::WGPUDeviceExtras>,
 ) -> (
-    wgt::DeviceDescriptor<wgc::Label<'a>>,
+    wgt::DeviceDescriptor<wgpu::Label<'a>>,
     Option<UncapturedErrorCallback>,
 ) {
     (
         wgt::DeviceDescriptor {
-            label: string_view_into_label(des.label),
+            label: string_view_into_str(des.label),
             required_features: map_features(make_slice(
                 des.requiredFeatures,
                 des.requiredFeatureCount,
@@ -391,7 +385,7 @@ pub(crate) unsafe fn map_device_descriptor<'a>(
 pub unsafe fn map_pipeline_layout_descriptor<'a>(
     des: &native::WGPUPipelineLayoutDescriptor,
     extras: Option<&native::WGPUPipelineLayoutExtras>,
-) -> wgc::binding_model::PipelineLayoutDescriptor<'a> {
+) -> wgpu::PipelineLayoutDescriptor<'a> {
     let bind_group_layouts = make_slice(des.bindGroupLayouts, des.bindGroupLayoutCount)
         .iter()
         .map(|layout| {
@@ -413,10 +407,10 @@ pub unsafe fn map_pipeline_layout_descriptor<'a>(
             .collect()
     });
 
-    return wgc::binding_model::PipelineLayoutDescriptor {
-        label: string_view_into_label(des.label),
-        bind_group_layouts: Cow::from(bind_group_layouts),
-        push_constant_ranges: Cow::from(push_constant_ranges),
+    return wgpu::PipelineLayoutDescriptor {
+        label: string_view_into_str(des.label),
+        bind_group_layouts,
+        push_constant_ranges: &push_constant_ranges,
     };
 }
 
@@ -609,7 +603,8 @@ pub unsafe fn map_shader_module<'a>(
     spirv: Option<&native::WGPUShaderSourceSPIRV>,
     wgsl: Option<&native::WGPUShaderSourceWGSL>,
     glsl: Option<&native::WGPUShaderSourceGLSL>,
-) -> Result<wgc::pipeline::ShaderModuleSource<'a>, ShaderParseError> {
+) -> Result<wgpu::ShaderSource<'a>, ShaderParseError> {
+    // TODO:
     #[cfg(feature = "wgsl")]
     if let Some(wgsl) = wgsl {
         let str_slice: &str = string_view_into_str(wgsl.code).unwrap_or("");
@@ -1328,31 +1323,29 @@ pub fn to_native_composite_alpha_mode(
 pub fn map_bind_group_entry<'a>(
     entry: &'a native::WGPUBindGroupEntry,
     extras: Option<&native::WGPUBindGroupEntryExtras>,
-) -> wgc::binding_model::BindGroupEntry<'a> {
+) -> wgpu::BindGroupEntry<'a> {
     if let Some(buffer) = unsafe { entry.buffer.as_ref() } {
-        return wgc::binding_model::BindGroupEntry {
+        return wgpu::BindGroupEntry {
             binding: entry.binding,
-            resource: wgc::binding_model::BindingResource::Buffer(
-                wgc::binding_model::BufferBinding {
-                    buffer: buffer.id,
-                    offset: entry.offset,
-                    size: match entry.size {
-                        0 => panic!("invalid size"),
-                        WGPU_WHOLE_SIZE => None,
-                        _ => Some(unsafe { NonZeroU64::new_unchecked(entry.size) }),
-                    },
+            resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                buffer: buffer.id,
+                offset: entry.offset,
+                size: match entry.size {
+                    0 => panic!("invalid size"),
+                    WGPU_WHOLE_SIZE => None,
+                    _ => Some(unsafe { NonZeroU64::new_unchecked(entry.size) }),
                 },
-            ),
+            }),
         };
     } else if let Some(sampler) = unsafe { entry.sampler.as_ref() } {
-        return wgc::binding_model::BindGroupEntry {
+        return wgpu::BindGroupEntry {
             binding: entry.binding,
-            resource: wgc::binding_model::BindingResource::Sampler(sampler.id),
+            resource: wgpu::BindingResource::Sampler(sampler.id),
         };
     } else if let Some(texture_view) = unsafe { entry.textureView.as_ref() } {
-        return wgc::binding_model::BindGroupEntry {
+        return wgpu::BindGroupEntry {
             binding: entry.binding,
-            resource: wgc::binding_model::BindingResource::TextureView(texture_view.id),
+            resource: wgpu::BindingResource::TextureView(texture_view.id),
         };
     } else if let Some(extras) = extras {
         if let Some(texture_views) = unsafe { extras.textureViews.as_ref() } {
@@ -1364,9 +1357,9 @@ pub fn map_bind_group_entry<'a>(
                         .id
                 })
                 .collect();
-            return wgc::binding_model::BindGroupEntry {
+            return wgpu::BindGroupEntry {
                 binding: entry.binding,
-                resource: wgc::binding_model::BindingResource::TextureViewArray(arr),
+                resource: wgpu::BindingResource::TextureViewArray(arr),
             };
         } else if let Some(samplers) = unsafe { extras.samplers.as_ref() } {
             let arr = make_slice(samplers, extras.samplerCount)
@@ -1377,14 +1370,14 @@ pub fn map_bind_group_entry<'a>(
                         .id
                 })
                 .collect();
-            return wgc::binding_model::BindGroupEntry {
+            return wgpu::BindGroupEntry {
                 binding: entry.binding,
-                resource: wgc::binding_model::BindingResource::SamplerArray(arr),
+                resource: wgpu::BindingResource::SamplerArray(arr),
             };
         } else if let Some(buffers) = unsafe { extras.buffers.as_ref() } {
             let arr = make_slice(buffers, extras.bufferCount)
                 .iter()
-                .map(|v| wgc::binding_model::BufferBinding {
+                .map(|v| wgpu::BufferBinding {
                     buffer: unsafe { v.as_ref() }
                         .expect("invalid buffers for bind group entry extras")
                         .id,
@@ -1392,9 +1385,9 @@ pub fn map_bind_group_entry<'a>(
                     size: std::num::NonZeroU64::new(entry.size),
                 })
                 .collect();
-            return wgc::binding_model::BindGroupEntry {
+            return wgpu::BindGroupEntry {
                 binding: entry.binding,
-                resource: wgc::binding_model::BindingResource::BufferArray(arr),
+                resource: wgpu::BindingResource::BufferArray(arr),
             };
         }
     }
@@ -1517,7 +1510,7 @@ pub fn map_query_set_index(index: u32) -> Option<u32> {
 pub unsafe fn map_query_set_descriptor<'a>(
     desc: &native::WGPUQuerySetDescriptor,
     extras: Option<&native::WGPUQuerySetDescriptorExtras>,
-) -> wgt::QuerySetDescriptor<wgc::Label<'a>> {
+) -> wgt::QuerySetDescriptor<wgpu::Label<'a>> {
     wgt::QuerySetDescriptor {
         label: string_view_into_label(desc.label),
         count: desc.count,
@@ -1561,8 +1554,8 @@ pub unsafe fn map_query_set_descriptor<'a>(
 pub unsafe fn map_texture_view_descriptor<'a>(
     descriptor: &native::WGPUTextureViewDescriptor,
     extras: Option<&native::WGPUTextureViewExtras>,
-) -> wgc::resource::TextureViewDescriptor<'a> {
-    let mut desc = wgc::resource::TextureViewDescriptor {
+) -> wgt::TextureViewDescriptor<wgpu::Label<'a>> {
+    let mut desc = wgt::TextureViewDescriptor {
         usage: Some(map_texture_usage_flags(descriptor.usage)),
         label: string_view_into_label(descriptor.label),
         format: map_texture_format(descriptor.format),
