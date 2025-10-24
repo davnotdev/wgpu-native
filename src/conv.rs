@@ -1,9 +1,12 @@
 use crate::utils::{make_slice, string_view_into_str};
 use crate::{follow_chain, map_enum, map_enum_with_undefined, new_userdata};
 use crate::{native, UncapturedErrorCallback};
-use std::borrow::Cow;
-use std::num::{NonZeroIsize, NonZeroU32, NonZeroU64};
-use std::ptr::NonNull;
+use std::{
+    borrow::Cow,
+    mem,
+    num::{NonZeroIsize, NonZeroU32, NonZeroU64},
+    ptr::NonNull,
+};
 
 map_enum!(map_store_op, WGPUStoreOp, wgt::StoreOp, Discard, Store);
 map_enum_with_undefined!(
@@ -382,6 +385,29 @@ pub(crate) unsafe fn map_device_descriptor<'a>(
 }
 
 #[inline]
+pub fn map_submission_index(index: native::WGPUSubmissionIndex) -> wgpu::SubmissionIndex {
+    // HACK: `wgpu::SubmissionIndex` is unique to wgpu.
+    struct Index {
+        index: u64,
+    }
+    assert!(mem::size_of::<Index>() == mem::size_of::<wgpu::SubmissionIndex>());
+    let index = Index { index };
+    let index: wgpu::SubmissionIndex = unsafe { mem::transmute_copy(&index) };
+    index
+}
+
+#[inline]
+pub fn to_native_submission_index(index: wgpu::SubmissionIndex) -> native::WGPUSubmissionIndex {
+    // HACK: `wgpu::SubmissionIndex` is unique to wgpu.
+    struct Index {
+        index: u64,
+    }
+    assert!(mem::size_of::<Index>() == mem::size_of::<wgpu::SubmissionIndex>());
+    let index: Index = unsafe { mem::transmute_copy(&index) };
+    index.index
+}
+
+#[inline]
 pub unsafe fn map_pipeline_layout_descriptor<'a>(
     des: &native::WGPUPipelineLayoutDescriptor,
     extras: Option<&native::WGPUPipelineLayoutExtras>,
@@ -392,7 +418,6 @@ pub unsafe fn map_pipeline_layout_descriptor<'a>(
             layout
                 .as_ref()
                 .expect("invalid bind group layout for pipeline layout descriptor")
-                .id
         })
         .collect::<Vec<_>>();
 
@@ -407,11 +432,13 @@ pub unsafe fn map_pipeline_layout_descriptor<'a>(
             .collect()
     });
 
-    return wgpu::PipelineLayoutDescriptor {
-        label: string_view_into_str(des.label),
-        bind_group_layouts,
-        push_constant_ranges: &push_constant_ranges,
-    };
+    // TODO: GAHH we need to preserve some variables here.
+    // return wgpu::PipelineLayoutDescriptor {
+    //     label: string_view_into_str(des.label),
+    //     bind_group_layouts: &bind_group_layouts,
+    //     push_constant_ranges: &push_constant_ranges,
+    // };
+    todo!()
 }
 
 #[inline]
@@ -460,7 +487,7 @@ pub fn write_limits_struct(wgt_limits: wgt::Limits, limits: &mut native::WGPULim
     }) = unsafe { limits.nextInChain.as_ref() }
     {
         unsafe {
-            let native_limits = std::mem::transmute::<
+            let native_limits = mem::transmute::<
                 *mut native::WGPUChainedStructOut,
                 *mut native::WGPUNativeLimits,
             >(limits.nextInChain);
@@ -604,13 +631,9 @@ pub unsafe fn map_shader_module<'a>(
     wgsl: Option<&native::WGPUShaderSourceWGSL>,
     glsl: Option<&native::WGPUShaderSourceGLSL>,
 ) -> Result<wgpu::ShaderSource<'a>, ShaderParseError> {
-    // TODO:
-    #[cfg(feature = "wgsl")]
     if let Some(wgsl) = wgsl {
         let str_slice: &str = string_view_into_str(wgsl.code).unwrap_or("");
-        return Ok(wgc::pipeline::ShaderModuleSource::Wgsl(Cow::Borrowed(
-            str_slice,
-        )));
+        return Ok(wgpu::ShaderSource::Wgsl(Cow::Borrowed(str_slice)));
     }
 
     #[cfg(feature = "spirv")]
@@ -624,7 +647,7 @@ pub unsafe fn map_shader_module<'a>(
         };
         let frontend = naga::front::spv::Frontend::new(slice.iter().cloned(), &options);
         match frontend.parse() {
-            Ok(module) => return Ok(wgc::pipeline::ShaderModuleSource::Naga(Cow::Owned(module))),
+            Ok(module) => return Ok(wgpu::ShaderSource::Naga(Cow::Owned(module))),
             Err(cause) => return Err(ShaderParseError::Spirv(cause)),
         };
     }
@@ -649,7 +672,7 @@ pub unsafe fn map_shader_module<'a>(
 
         let mut frontend = naga::front::glsl::Frontend::default();
         match frontend.parse(&options, str_slice) {
-            Ok(module) => return Ok(wgc::pipeline::ShaderModuleSource::Naga(Cow::Owned(module))),
+            Ok(module) => return Ok(wgpu::ShaderSource::Naga(Cow::Owned(module))),
             Err(causes) => return Err(ShaderParseError::Glsl(causes)),
         };
     }
@@ -660,13 +683,12 @@ pub unsafe fn map_shader_module<'a>(
 #[inline]
 pub unsafe fn map_image_copy_texture(
     native: &native::WGPUTexelCopyTextureInfo,
-) -> wgc::command::TexelCopyTextureInfo {
-    wgt::TexelCopyTextureInfo {
+) -> wgpu::TexelCopyTextureInfo {
+    wgpu::TexelCopyTextureInfo {
         texture: native
             .texture
             .as_ref()
-            .expect("invalid texture for image copy texture")
-            .id,
+            .expect("invalid texture for image copy texture"),
         mip_level: native.mipLevel,
         origin: map_origin3d(&native.origin),
         aspect: map_texture_aspect(native.aspect).unwrap_or(wgt::TextureAspect::All),
@@ -676,13 +698,12 @@ pub unsafe fn map_image_copy_texture(
 #[inline]
 pub unsafe fn map_image_copy_buffer(
     native: &native::WGPUTexelCopyBufferInfo,
-) -> wgc::command::TexelCopyBufferInfo {
-    wgt::TexelCopyBufferInfo {
+) -> wgpu::TexelCopyBufferInfo {
+    wgpu::TexelCopyBufferInfo {
         buffer: native
             .buffer
             .as_ref()
-            .expect("invalid buffer for image copy buffer")
-            .id,
+            .expect("invalid buffer for image copy buffer"),
         layout: map_texture_data_layout(&native.layout),
     }
 }
@@ -707,13 +728,10 @@ pub fn map_texture_data_layout(
 }
 
 #[inline]
-pub fn map_load_op<T>(
-    command: native::WGPULoadOp,
-    clear_value: T,
-) -> Option<wgc::command::LoadOp<T>> {
+pub fn map_load_op<T>(command: native::WGPULoadOp, clear_value: T) -> Option<wgt::LoadOp<T>> {
     match command {
-        native::WGPULoadOp_Load => Some(wgc::command::LoadOp::Load),
-        native::WGPULoadOp_Clear => Some(wgc::command::LoadOp::Clear(clear_value)),
+        native::WGPULoadOp_Load => Some(wgt::LoadOp::Load),
+        native::WGPULoadOp_Clear => Some(wgt::LoadOp::Clear(clear_value)),
         _ => None,
     }
 }
@@ -1016,48 +1034,6 @@ pub fn map_stencil_face_state(
 }
 
 #[inline]
-pub fn map_storage_report(report: &wgc::registry::RegistryReport) -> native::WGPURegistryReport {
-    native::WGPURegistryReport {
-        numAllocated: report.num_allocated,
-        numKeptFromUser: report.num_kept_from_user,
-        numReleasedFromUser: report.num_released_from_user,
-        elementSize: report.element_size,
-    }
-}
-
-#[inline]
-pub fn map_hub_report(report: &wgc::hub::HubReport) -> native::WGPUHubReport {
-    native::WGPUHubReport {
-        adapters: map_storage_report(&report.adapters),
-        devices: map_storage_report(&report.devices),
-        queues: map_storage_report(&report.queues),
-        pipelineLayouts: map_storage_report(&report.pipeline_layouts),
-        shaderModules: map_storage_report(&report.shader_modules),
-        bindGroupLayouts: map_storage_report(&report.bind_group_layouts),
-        bindGroups: map_storage_report(&report.bind_groups),
-        commandBuffers: map_storage_report(&report.command_buffers),
-        renderBundles: map_storage_report(&report.render_bundles),
-        renderPipelines: map_storage_report(&report.render_pipelines),
-        computePipelines: map_storage_report(&report.compute_pipelines),
-        pipelineCaches: map_storage_report(&report.pipeline_caches),
-        querySets: map_storage_report(&report.query_sets),
-        buffers: map_storage_report(&report.buffers),
-        textures: map_storage_report(&report.textures),
-        textureViews: map_storage_report(&report.texture_views),
-        samplers: map_storage_report(&report.samplers),
-    }
-}
-
-#[inline]
-pub fn write_global_report(
-    native_report: &mut native::WGPUGlobalReport,
-    report: &wgc::global::GlobalReport,
-) {
-    native_report.surfaces = map_storage_report(&report.surfaces);
-    native_report.hub = map_hub_report(&report.hub);
-}
-
-#[inline]
 pub fn map_features(features: &[native::WGPUFeatureName]) -> wgt::Features {
     let mut temp = wgt::Features::empty();
 
@@ -1328,7 +1304,7 @@ pub fn map_bind_group_entry<'a>(
         return wgpu::BindGroupEntry {
             binding: entry.binding,
             resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                buffer: buffer.id,
+                buffer,
                 offset: entry.offset,
                 size: match entry.size {
                     0 => panic!("invalid size"),
@@ -1340,55 +1316,59 @@ pub fn map_bind_group_entry<'a>(
     } else if let Some(sampler) = unsafe { entry.sampler.as_ref() } {
         return wgpu::BindGroupEntry {
             binding: entry.binding,
-            resource: wgpu::BindingResource::Sampler(sampler.id),
+            resource: wgpu::BindingResource::Sampler(sampler),
         };
     } else if let Some(texture_view) = unsafe { entry.textureView.as_ref() } {
         return wgpu::BindGroupEntry {
             binding: entry.binding,
-            resource: wgpu::BindingResource::TextureView(texture_view.id),
+            resource: wgpu::BindingResource::TextureView(texture_view),
         };
     } else if let Some(extras) = extras {
         if let Some(texture_views) = unsafe { extras.textureViews.as_ref() } {
-            let arr = make_slice(texture_views, extras.textureViewCount)
-                .iter()
-                .map(|v| {
-                    unsafe { v.as_ref() }
-                        .expect("invalid texture views for bind group entry extras")
-                        .id
-                })
-                .collect();
-            return wgpu::BindGroupEntry {
-                binding: entry.binding,
-                resource: wgpu::BindingResource::TextureViewArray(arr),
-            };
-        } else if let Some(samplers) = unsafe { extras.samplers.as_ref() } {
-            let arr = make_slice(samplers, extras.samplerCount)
-                .iter()
-                .map(|v| {
-                    unsafe { v.as_ref() }
-                        .expect("invalid sampler for bind group entry extras")
-                        .id
-                })
-                .collect();
-            return wgpu::BindGroupEntry {
-                binding: entry.binding,
-                resource: wgpu::BindingResource::SamplerArray(arr),
-            };
-        } else if let Some(buffers) = unsafe { extras.buffers.as_ref() } {
-            let arr = make_slice(buffers, extras.bufferCount)
-                .iter()
-                .map(|v| wgpu::BufferBinding {
-                    buffer: unsafe { v.as_ref() }
-                        .expect("invalid buffers for bind group entry extras")
-                        .id,
-                    offset: entry.offset,
-                    size: std::num::NonZeroU64::new(entry.size),
-                })
-                .collect();
-            return wgpu::BindGroupEntry {
-                binding: entry.binding,
-                resource: wgpu::BindingResource::BufferArray(arr),
-            };
+            // TODO: FIGURE OUT HOW TO MAKE THIS NOT KABOOM!
+            // let arr = make_slice(texture_views, extras.textureViewCount)
+            //     .iter()
+            //     .map(|v| {
+            //         // TODO: VERY KABOOM-ABLE
+            //         &unsafe { std::ptr::read(*v) }
+            //         // unsafe { v.as_ref() }
+            //         //     .expect("invalid texture views for bind group entry extras")
+            //     })
+            //     .collect::<Vec<_>>();
+            // return wgpu::BindGroupEntry {
+            //     binding: entry.binding,
+            //     resource: wgpu::BindingResource::TextureViewArray(&arr),
+            // };
+            // } else if let Some(samplers) = unsafe { extras.samplers.as_ref() } {
+            // let arr = make_slice(samplers, extras.samplerCount)
+            //     .iter()
+            //     .map(|v| {
+            //         // TODO: VERY KABOOM-ABLE
+            //         &unsafe { std::ptr::read(*v) }
+            //         // unsafe { v.as_ref() }
+            //         //     .expect("invalid sampler for bind group entry extras")
+            //     })
+            //     .collect::<Vec<_>>();
+            // return wgpu::BindGroupEntry {
+            //     binding: entry.binding,
+            //     resource: wgpu::BindingResource::SamplerArray(&arr),
+            // };
+            // } else if let Some(buffers) = unsafe { extras.buffers.as_ref() } {
+            // let arr = make_slice(buffers, extras.bufferCount)
+            //     .iter()
+            //     .map(|v| wgpu::BufferBinding {
+            //         // TODO: VERY KABOOM-ABLE
+            //         buffer: &unsafe { std::ptr::read(*v) },
+            //         // unsafe { v.as_ref() }
+            //         // .expect("invalid buffers for bind group entry extras")
+            //         offset: entry.offset,
+            //         size: std::num::NonZeroU64::new(entry.size),
+            //     })
+            //     .collect::<Vec<_>>();
+            // return wgpu::BindGroupEntry {
+            //     binding: entry.binding,
+            //     resource: wgpu::BindingResource::BufferArray(&arr),
+            // };
         }
     }
 
@@ -1512,7 +1492,7 @@ pub unsafe fn map_query_set_descriptor<'a>(
     extras: Option<&native::WGPUQuerySetDescriptorExtras>,
 ) -> wgt::QuerySetDescriptor<wgpu::Label<'a>> {
     wgt::QuerySetDescriptor {
-        label: string_view_into_label(desc.label),
+        label: string_view_into_str(desc.label),
         count: desc.count,
         ty: match (desc.type_, extras) {
             (native::WGPUQueryType_Occlusion, _) => wgt::QueryType::Occlusion,
@@ -1557,23 +1537,21 @@ pub unsafe fn map_texture_view_descriptor<'a>(
 ) -> wgt::TextureViewDescriptor<wgpu::Label<'a>> {
     let mut desc = wgt::TextureViewDescriptor {
         usage: Some(map_texture_usage_flags(descriptor.usage)),
-        label: string_view_into_label(descriptor.label),
+        label: string_view_into_str(descriptor.label),
         format: map_texture_format(descriptor.format),
         dimension: map_texture_view_dimension(descriptor.dimension),
-        range: wgt::ImageSubresourceRange {
-            aspect: map_texture_aspect(descriptor.aspect).unwrap_or(wgt::TextureAspect::All),
-            base_mip_level: descriptor.baseMipLevel,
-            mip_level_count: match descriptor.mipLevelCount {
-                0 => panic!("invalid mipLevelCount"),
-                native::WGPU_MIP_LEVEL_COUNT_UNDEFINED => None,
-                _ => Some(descriptor.mipLevelCount),
-            },
-            base_array_layer: descriptor.baseArrayLayer,
-            array_layer_count: match descriptor.arrayLayerCount {
-                0 => panic!("invalid arrayLayerCount"),
-                native::WGPU_ARRAY_LAYER_COUNT_UNDEFINED => None,
-                _ => Some(descriptor.arrayLayerCount),
-            },
+        aspect: map_texture_aspect(descriptor.aspect).unwrap_or(wgt::TextureAspect::All),
+        base_mip_level: descriptor.baseMipLevel,
+        mip_level_count: match descriptor.mipLevelCount {
+            0 => panic!("invalid mipLevelCount"),
+            native::WGPU_MIP_LEVEL_COUNT_UNDEFINED => None,
+            _ => Some(descriptor.mipLevelCount),
+        },
+        base_array_layer: descriptor.baseArrayLayer,
+        array_layer_count: match descriptor.arrayLayerCount {
+            0 => panic!("invalid arrayLayerCount"),
+            native::WGPU_ARRAY_LAYER_COUNT_UNDEFINED => None,
+            _ => Some(descriptor.arrayLayerCount),
         },
         swizzle: None,
     };

@@ -52,7 +52,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [features]
 # TODO:
-default = ["spirv", "glsl"]
+default = ["spirv", "glsl", "wgsl"]
 
 #! ### Backends
 # --------------------------------------------------------------------
@@ -87,9 +87,12 @@ spirv = ["naga/spv-in"]
 ## Enable accepting GLSL shaders as input.
 glsl = ["naga/glsl-in"]
 
+## Enable accepting WGSL shaders as input.
+wgsl = ["wgpu/wgsl"]
+
 [dependencies.wgpu]
 workspace = true
-features = ["std", "parking_lot", "webgpu", "wgsl"]
+features = ["std", "parking_lot", "webgpu", "wgsl", "naga-ir"]
 
 [dependencies.hal]
 workspace = true
