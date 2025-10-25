@@ -13,8 +13,8 @@ use std::{
     error,
     fmt::Display,
     mem,
-    slice,
     num::NonZeroU64,
+    slice,
     sync::{atomic, Arc},
     thread,
 };
@@ -481,6 +481,87 @@ pub unsafe extern "C" fn wgpuAdapterInfoFreeMembers(adapter_info: native::WGPUAd
     utils::drop_string_view(adapter_info.architecture);
     utils::drop_string_view(adapter_info.device);
     utils::drop_string_view(adapter_info.description);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn wgpuAdapterRequestDevice(
+    adapter: native::WGPUAdapter,
+    descriptor: Option<&native::WGPUDeviceDescriptor>,
+    callback_info: native::WGPURequestDeviceCallbackInfo,
+) -> native::WGPUFuture {
+    let adapter = &adapter.as_ref().expect("invalid adapter");
+    let callback = callback_info.callback.expect("invalid callback");
+
+    let adapter_limits = adapter.limits();
+    let base_limits = get_base_device_limits_from_adapter_limits(&adapter_limits);
+
+    let (desc, device_lost_handler, error_callback) = match descriptor {
+        Some(descriptor) => {
+            let (desc, error_callback) = follow_chain!(
+                map_device_descriptor((descriptor, base_limits),
+                WGPUSType_DeviceExtras => native::WGPUDeviceExtras)
+            );
+            let device_lost_handler = DeviceLostCallback {
+                callback: descriptor.deviceLostCallbackInfo.callback,
+                userdata: new_userdata!(descriptor.deviceLostCallbackInfo),
+            };
+            (desc, device_lost_handler, error_callback)
+        }
+        None => (
+            wgt::DeviceDescriptor {
+                required_limits: base_limits,
+                ..Default::default()
+            },
+            DEFAULT_DEVICE_LOST_HANDLER,
+            None,
+        ),
+    };
+
+    // TODO
+    // adapter.request_device(&desc);
+    todo!()
+
+    // let result = context.adapter_request_device(adapter_id, &desc, None, None);
+    // match result {
+    //     Ok((device_id, queue_id)) => {
+    //         let mut error_sink = ErrorSinkRaw::new(device_lost_handler);
+    //         if let Some(error_callback) = error_callback {
+    //             error_sink.uncaptured_handler = error_callback;
+    //         }
+
+    //         let error_sink = Arc::new(Mutex::new(error_sink));
+    //         let device = Arc::into_raw(Arc::new(WGPUDeviceImpl {
+    //             context: context.clone(),
+    //             id: device_id,
+    //             queue: Arc::new(QueueId {
+    //                 context: context.clone(),
+    //                 id: queue_id,
+    //             }),
+    //             error_sink: error_sink.clone(),
+    //         }));
+    //         error_sink.lock().device = Some(device);
+
+    //         callback(
+    //             native::WGPURequestDeviceStatus_Success,
+    //             device,
+    //             EMPTY_STRING,
+    //             callback_info.userdata1,
+    //             callback_info.userdata2,
+    //         );
+    //     }
+    //     Err(err) => {
+    //         let message = format_error(&err);
+    //         callback(
+    //             native::WGPURequestDeviceStatus_Error,
+    //             std::ptr::null_mut(),
+    //             str_into_string_view(&message),
+    //             callback_info.userdata1,
+    //             callback_info.userdata2,
+    //         );
+    //     }
+    // };
+
+    // NULL_FUTURE
 }
 
 #[no_mangle]
