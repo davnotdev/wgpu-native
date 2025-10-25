@@ -37,11 +37,6 @@ package = "wgpu-types"
 git = "https://github.com/davnotdev/wgpu"
 branch = "godot-webgpu"
 
-[workspace.dependencies.hal]
-package = "wgpu-hal"
-git = "https://github.com/davnotdev/wgpu"
-branch = "godot-webgpu"
-
 [workspace.dependencies.naga]
 package = "naga"
 git = "https://github.com/davnotdev/wgpu"
@@ -93,15 +88,6 @@ wgsl = ["wgpu/wgsl"]
 [dependencies.wgpu]
 workspace = true
 features = ["std", "parking_lot", "webgpu", "wgsl", "naga-ir"]
-
-[dependencies.hal]
-workspace = true
-
-[target.'cfg(all(unix, not(target_os = "ios"), not(target_os = "macos")))'.dependencies]
-hal = { workspace = true, features = ["renderdoc"] }
-
-[target.'cfg(windows)'.dependencies]
-hal = { workspace = true, features = ["dx12", "renderdoc"] }
 
 [dependencies.wgt]
 workspace = true
