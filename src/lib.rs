@@ -6,7 +6,6 @@ use conv::{
     map_surface_configuration, map_texture_view_descriptor, to_native_submission_index,
     to_native_texture_format, to_native_texture_usage_flags, CreateSurfaceParams,
 };
-use core::slice;
 use parking_lot::Mutex;
 use smallvec::SmallVec;
 use std::{
@@ -14,6 +13,7 @@ use std::{
     error,
     fmt::Display,
     mem,
+    slice,
     num::NonZeroU64,
     sync::{atomic, Arc},
     thread,
@@ -2314,21 +2314,23 @@ pub unsafe extern "C" fn wgpuInstanceEnumerateAdapters(
         None => wgt::Backends::all(),
     };
 
-    let result = instance.enumerate_adapters(inputs);
-    let count = result.len();
+    // let result = instance.enumerate_adapters(inputs);
 
-    if !adapters.is_null() {
-        let temp = std::slice::from_raw_parts_mut(adapters, count);
+    // let count = result.len();
 
-        result.into_iter().enumerate().for_each(|(i, adapter)| {
-            // It's users responsibility to drop the adapters they
-            // don't need.
+    // if !adapters.is_null() {
+    //     let temp = std::slice::from_raw_parts_mut(adapters, count);
 
-            temp[i] = Arc::into_raw(Arc::new(adapter));
-        });
-    }
+    //     result.into_iter().enumerate().for_each(|(i, adapter)| {
+    //         // It's users responsibility to drop the adapters they
+    //         // don't need.
 
-    count
+    //         temp[i] = Arc::into_raw(Arc::new(adapter));
+    //     });
+    // }
+
+    // count
+    0
 }
 
 #[no_mangle]
