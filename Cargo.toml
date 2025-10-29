@@ -29,18 +29,18 @@ resolver = "2"
 [workspace.dependencies.wgpu]
 package = "wgpu"
 git = "https://github.com/davnotdev/wgpu"
-branch = "godot-webgpu"
+branch = "godot-webgpu-emscripten-hack"
 default-features = false
 
 [workspace.dependencies.wgt]
 package = "wgpu-types"
 git = "https://github.com/davnotdev/wgpu"
-branch = "godot-webgpu"
+branch = "godot-webgpu-emscripten-hack"
 
 [workspace.dependencies.naga]
 package = "naga"
 git = "https://github.com/davnotdev/wgpu"
-branch = "godot-webgpu"
+branch = "godot-webgpu-emscripten-hack"
 
 [lib]
 crate-type = ["cdylib", "staticlib"]
@@ -87,7 +87,7 @@ wgsl = ["wgpu/wgsl"]
 
 [dependencies.wgpu]
 workspace = true
-features = ["std", "parking_lot", "webgpu", "wgsl", "naga-ir"]
+features = ["std", "webgpu", "wgsl", "naga-ir"]
 
 [dependencies.wgt]
 workspace = true
