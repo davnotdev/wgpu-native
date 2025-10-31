@@ -1194,6 +1194,7 @@ pub unsafe extern "C" fn wgpuCommandEncoderBeginRenderPass(
                             .expect("invalid load op for render pass color attachment"),
                             store_op: conv::map_store_op(color_attachment.storeOp)
                                 .expect("invalid store op for render pass color attachment"),
+                            depth_slice: None,
                         }
                     })
                 })
@@ -1277,7 +1278,7 @@ pub unsafe extern "C" fn wgpuCommandEncoderCopyBufferToBuffer(
         source_offset,
         destination_buffer_id,
         destination_offset,
-        size,
+        Some(size),
     ) {
         handle_error(
             error_sink,
@@ -4132,6 +4133,7 @@ pub unsafe extern "C" fn wgpuTextureCreateView(
                     _ => Some(descriptor.arrayLayerCount),
                 },
             },
+            swizzle: None,
         },
         None => wgc::resource::TextureViewDescriptor::default(),
     };
