@@ -514,7 +514,7 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 [[package]]
 name = "naga"
 version = "26.0.0"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#b26f2b5bd9e8cc3ebe59fb33cf16226184707715"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#9cdebfae86b14d2f9452cc5cf35d12dba3d5d7c3"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -960,7 +960,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "26.0.0"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#b26f2b5bd9e8cc3ebe59fb33cf16226184707715"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#9cdebfae86b14d2f9452cc5cf35d12dba3d5d7c3"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -991,7 +991,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-apple"
 version = "26.0.0"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#b26f2b5bd9e8cc3ebe59fb33cf16226184707715"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#9cdebfae86b14d2f9452cc5cf35d12dba3d5d7c3"
 dependencies = [
  "wgpu-hal",
 ]
@@ -999,7 +999,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-emscripten"
 version = "26.0.0"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#b26f2b5bd9e8cc3ebe59fb33cf16226184707715"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#9cdebfae86b14d2f9452cc5cf35d12dba3d5d7c3"
 dependencies = [
  "wgpu-hal",
 ]
@@ -1007,7 +1007,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-windows-linux-android"
 version = "26.0.0"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#b26f2b5bd9e8cc3ebe59fb33cf16226184707715"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#9cdebfae86b14d2f9452cc5cf35d12dba3d5d7c3"
 dependencies = [
  "wgpu-hal",
 ]
@@ -1015,7 +1015,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "26.0.0"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#b26f2b5bd9e8cc3ebe59fb33cf16226184707715"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#9cdebfae86b14d2f9452cc5cf35d12dba3d5d7c3"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -1079,7 +1079,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "26.0.0"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#b26f2b5bd9e8cc3ebe59fb33cf16226184707715"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-webgpu#9cdebfae86b14d2f9452cc5cf35d12dba3d5d7c3"
 dependencies = [
  "bitflags",
  "bytemuck",
