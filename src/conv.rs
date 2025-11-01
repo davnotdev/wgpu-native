@@ -484,6 +484,9 @@ pub fn map_required_limits(
     extras: Option<&native::WGPUNativeLimits>,
 ) -> wgt::Limits {
     let mut wgt_limits = base_limits;
+    wgt_limits.max_binding_array_elements_per_shader_stage = 999;
+    wgt_limits.max_binding_array_sampler_elements_per_shader_stage = 999;
+
     if limits.maxTextureDimension1D != native::WGPU_LIMIT_U32_UNDEFINED {
         wgt_limits.max_texture_dimension_1d = limits.maxTextureDimension1D;
     }
