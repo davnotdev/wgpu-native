@@ -666,7 +666,7 @@ pub unsafe extern "C" fn wgpuCreateInstance(
     };
 
     Arc::into_raw(Arc::new(WGPUInstanceImpl {
-        context: Arc::new(Context::new("wgpu", &instance_desc)),
+        context: Arc::new(Context::new("wgpu", &instance_desc, None)),
     }))
 }
 
@@ -1208,6 +1208,7 @@ pub unsafe extern "C" fn wgpuCommandEncoderBeginRenderPass(
         depth_stencil_attachment: depth_stencil_attachment.as_ref(),
         timestamp_writes: timestamp_writes.as_ref(),
         occlusion_query_set: descriptor.occlusionQuerySet.as_ref().map(|v| v.id),
+        multiview_mask: None,
     };
 
     let (pass, err) = context.command_encoder_begin_render_pass(command_encoder_id, &desc);
@@ -1410,7 +1411,7 @@ pub unsafe extern "C" fn wgpuCommandEncoderFinish(
     let (command_buffer_id, error) =
         context.command_encoder_finish(command_encoder_id, &desc, None);
     if let Some(cause) = error {
-        handle_error(error_sink, cause, None, "wgpuCommandEncoderFinish");
+        handle_error(error_sink, cause.1, None, "wgpuCommandEncoderFinish");
     }
 
     Arc::into_raw(Arc::new(WGPUCommandBufferImpl {
@@ -2109,7 +2110,7 @@ pub unsafe extern "C" fn wgpuDeviceCreateRenderBundleEncoder(
         multiview: None,
     };
 
-    match wgc::command::RenderBundleEncoder::new(&desc, device_id, None) {
+    match wgc::command::RenderBundleEncoder::new(&desc, device_id) {
         Ok(encoder) => Arc::into_raw(Arc::new(WGPURenderBundleEncoderImpl {
             context: context.clone(),
             encoder: Box::into_raw(Box::new(Some(Box::into_raw(Box::new(encoder))))),
@@ -2267,7 +2268,7 @@ pub unsafe extern "C" fn wgpuDeviceCreateRenderPipeline(
                 ),
             }),
         // TODO(wgpu.h)
-        multiview: None,
+        multiview_mask: None,
         // TODO(wgpu.h)
         cache: None,
     };
@@ -2318,8 +2319,8 @@ pub unsafe extern "C" fn wgpuDeviceCreateSampler(
                 .unwrap_or(wgt::FilterMode::Nearest),
             min_filter: conv::map_filter_mode(descriptor.minFilter)
                 .unwrap_or(wgt::FilterMode::Nearest),
-            mipmap_filter: conv::map_mipmap_filter_mode(descriptor.mipmapFilter)
-                .unwrap_or(wgt::FilterMode::Nearest),
+            mipmap_filter: conv::map_mipmap_mipmap_filter_mode(descriptor.mipmapFilter)
+                .unwrap_or(wgt::MipmapFilterMode::Nearest),
             lod_min_clamp: descriptor.lodMinClamp,
             lod_max_clamp: descriptor.lodMaxClamp,
             compare: conv::map_compare_function(descriptor.compare)
@@ -2340,7 +2341,7 @@ pub unsafe extern "C" fn wgpuDeviceCreateSampler(
             ],
             mag_filter: wgt::FilterMode::Nearest,
             min_filter: wgt::FilterMode::Nearest,
-            mipmap_filter: wgt::FilterMode::Nearest,
+            mipmap_filter: wgt::MipmapFilterMode::Nearest,
             lod_min_clamp: 0f32,
             lod_max_clamp: 32f32,
             compare: None,
@@ -4340,7 +4341,7 @@ pub unsafe extern "C" fn wgpuDeviceCreateShaderModuleSpirV(
 #[no_mangle]
 pub unsafe extern "C" fn wgpuRenderPassEncoderSetPushConstants(
     pass: native::WGPURenderPassEncoder,
-    stages: native::WGPUShaderStage,
+    _stages: native::WGPUShaderStage,
     offset: u32,
     size_bytes: u32,
     data: *const u8,
@@ -4348,9 +4349,8 @@ pub unsafe extern "C" fn wgpuRenderPassEncoderSetPushConstants(
     let pass = pass.as_ref().expect("invalid render pass");
     let encoder = pass.encoder.as_mut().expect("invalid compute pass encoder");
 
-    match pass.context.render_pass_set_push_constants(
+    match pass.context.render_pass_set_immediates(
         encoder,
-        from_u64_bits(stages).expect("invalid shader stage"),
         offset,
         make_slice(data, size_bytes as usize),
     ) {
@@ -4374,7 +4374,7 @@ pub unsafe extern "C" fn wgpuComputePassEncoderSetPushConstants(
     let pass = pass.as_ref().expect("invalid compute pass");
     let encoder = pass.encoder.as_mut().expect("invalid compute pass encoder");
 
-    match pass.context.compute_pass_set_push_constants(
+    match pass.context.compute_pass_set_immediates(
         encoder,
         offset,
         make_slice(data, size_bytes as usize),
@@ -4392,7 +4392,7 @@ pub unsafe extern "C" fn wgpuComputePassEncoderSetPushConstants(
 #[no_mangle]
 pub unsafe extern "C" fn wgpuRenderBundleEncoderSetPushConstants(
     bundle: native::WGPURenderBundleEncoder,
-    stages: native::WGPUShaderStage,
+    _stages: native::WGPUShaderStage,
     offset: u32,
     size_bytes: u32,
     data: *const u8,
@@ -4402,13 +4402,7 @@ pub unsafe extern "C" fn wgpuRenderBundleEncoderSetPushConstants(
     let encoder = encoder.expect("invalid render bundle");
     let encoder = encoder.as_mut().unwrap();
 
-    bundle_ffi::wgpu_render_bundle_set_push_constants(
-        encoder,
-        wgt::ShaderStages::from_bits(stages.try_into().unwrap()).expect("invalid shader stage"),
-        offset,
-        size_bytes,
-        data,
-    );
+    bundle_ffi::wgpu_render_bundle_set_immediates(encoder, offset, size_bytes, data);
 }
 
 #[no_mangle]
