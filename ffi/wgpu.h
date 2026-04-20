@@ -1256,26 +1256,26 @@ typedef enum WGPUNativeTextureFormat
     WGPUNativeTextureFormat_P010 = 0x00030008,
 } WGPUNativeTextureFormat;
 
-typedef enum WGPUTextureComponentSwizzle {
-    WGPUTextureComponentSwizzle_Identity,
-    WGPUTextureComponentSwizzle_Zero,
-    WGPUTextureComponentSwizzle_One,
-    WGPUTextureComponentSwizzle_R,
-    WGPUTextureComponentSwizzle_G,
-    WGPUTextureComponentSwizzle_B,
-    WGPUTextureComponentSwizzle_A,
-} WGPUTextureComponentSwizzle;
+typedef enum WGPUNativeTextureComponentSwizzle {
+    WGPUNativeTextureComponentSwizzle_Identity,
+    WGPUNativeTextureComponentSwizzle_Zero,
+    WGPUNativeTextureComponentSwizzle_One,
+    WGPUNativeTextureComponentSwizzle_R,
+    WGPUNativeTextureComponentSwizzle_G,
+    WGPUNativeTextureComponentSwizzle_B,
+    WGPUNativeTextureComponentSwizzle_A,
+} WGPUNativeTextureComponentSwizzle;
 
-typedef struct WGPUTextureViewSwizzle {
-    WGPUTextureComponentSwizzle r;
-    WGPUTextureComponentSwizzle g;
-    WGPUTextureComponentSwizzle b;
-    WGPUTextureComponentSwizzle a;
-} WGPUTextureViewSwizzle;
+typedef struct WGPUNativeTextureViewSwizzle {
+    WGPUNativeTextureComponentSwizzle r;
+    WGPUNativeTextureComponentSwizzle g;
+    WGPUNativeTextureComponentSwizzle b;
+    WGPUNativeTextureComponentSwizzle a;
+} WGPUNativeTextureViewSwizzle;
 
 typedef struct WGPUTextureViewDescriptorExtras {
     WGPUChainedStruct chain;
-    WGPUTextureViewSwizzle swizzle;    
+    WGPUNativeTextureViewSwizzle swizzle;    
 } WGPUTextureViewExtras;
 
 #ifdef __cplusplus

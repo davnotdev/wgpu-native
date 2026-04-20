@@ -1721,22 +1721,22 @@ pub fn map_texture_usage_flags(flags: native::WGPUTextureUsage) -> wgt::TextureU
 
 #[inline]
 pub fn map_texture_component_swizzle(
-    component_swizzle: native::WGPUTextureComponentSwizzle,
+    component_swizzle: native::WGPUNativeTextureComponentSwizzle,
 ) -> wgt::TextureComponentSwizzle {
     match component_swizzle {
-        native::WGPUTextureComponentSwizzle_Zero => wgt::TextureComponentSwizzle::Zero,
-        native::WGPUTextureComponentSwizzle_One => wgt::TextureComponentSwizzle::One,
-        native::WGPUTextureComponentSwizzle_R => wgt::TextureComponentSwizzle::R,
-        native::WGPUTextureComponentSwizzle_G => wgt::TextureComponentSwizzle::G,
-        native::WGPUTextureComponentSwizzle_B => wgt::TextureComponentSwizzle::B,
-        native::WGPUTextureComponentSwizzle_A => wgt::TextureComponentSwizzle::A,
+        native::WGPUNativeTextureComponentSwizzle_Zero => wgt::TextureComponentSwizzle::Zero,
+        native::WGPUNativeTextureComponentSwizzle_One => wgt::TextureComponentSwizzle::One,
+        native::WGPUNativeTextureComponentSwizzle_R => wgt::TextureComponentSwizzle::R,
+        native::WGPUNativeTextureComponentSwizzle_G => wgt::TextureComponentSwizzle::G,
+        native::WGPUNativeTextureComponentSwizzle_B => wgt::TextureComponentSwizzle::B,
+        native::WGPUNativeTextureComponentSwizzle_A => wgt::TextureComponentSwizzle::A,
         _ => wgt::TextureComponentSwizzle::Identity,
     }
 }
 
 #[inline]
 pub fn map_texture_view_swizzle(
-    swizzle: native::WGPUTextureViewSwizzle,
+    swizzle: native::WGPUNativeTextureViewSwizzle,
 ) -> wgt::TextureViewSwizzle {
     wgt::TextureViewSwizzle {
         r: map_texture_component_swizzle(swizzle.r),
