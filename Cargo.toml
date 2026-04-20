@@ -24,19 +24,23 @@ resolver = "2"
 
 [workspace.dependencies.wgc]
 package = "wgpu-core"
-version = "29.0.1"
+git = "https://github.com/davnotdev/wgpu"
+branch = "godot-wgpu-29"
 
 [workspace.dependencies.wgt]
 package = "wgpu-types"
-version = "29.0.1"
+git = "https://github.com/davnotdev/wgpu"
+branch = "godot-wgpu-29"
 
 [workspace.dependencies.hal]
 package = "wgpu-hal"
-version = "29.0.1"
+git = "https://github.com/davnotdev/wgpu"
+branch = "godot-wgpu-29"
 
 [workspace.dependencies.naga]
 package = "naga"
-version = "29.0.1"
+git = "https://github.com/davnotdev/wgpu"
+branch = "godot-wgpu-29"
 
 [lib]
 crate-type = ["cdylib", "staticlib"]
