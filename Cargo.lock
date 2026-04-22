@@ -497,7 +497,7 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 [[package]]
 name = "naga"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -1003,7 +1003,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -1036,7 +1036,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-apple"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "wgpu-hal",
 ]
@@ -1044,7 +1044,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-emscripten"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "wgpu-hal",
 ]
@@ -1052,7 +1052,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core-deps-windows-linux-android"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "wgpu-hal",
 ]
@@ -1060,7 +1060,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -1110,7 +1110,7 @@ dependencies = [
 [[package]]
 name = "wgpu-naga-bridge"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "naga",
  "wgpu-types",
@@ -1138,7 +1138,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "29.0.1"
-source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#d08c087dd25ebb2b8544ee6a8a9a907be9924a73"
+source = "git+https://github.com/davnotdev/wgpu?branch=godot-wgpu-29#5ae4e0a28ac07b370bc9385c4a2a531469118501"
 dependencies = [
  "bitflags",
  "bytemuck",
