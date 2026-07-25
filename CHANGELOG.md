@@ -13,6 +13,7 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/
 
 ### Changed
 
+- moved 16bit norm textures into spec and out of wgpu.h `WGPUNativeTextureFormat_Rgba16Unorm` -> `WGPUTextureFormat_RGBA16Unorm`. by @Vipitis in [#600](https://github.com/gfx-rs/wgpu-native/pull/600)
 - Updated all wgpu crates to v29
 - MSRV bumped from 1.82 to 1.87.
 - **Push constants renamed to immediates.** This matches the upstream wgpu rename.
